@@ -20,6 +20,9 @@ from support_ai.billing import get_monthly_usage, create_checkout_session
 load_dotenv()
 
 app = FastAPI(title="GuardFlo Authoritative Support Surface")
+@app.get("/")
+def root():
+    return {"status": "API is live"}
 
 # =============================
 # Rate Limiting Setup

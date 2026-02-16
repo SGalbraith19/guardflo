@@ -1,4 +1,4 @@
-from app.database import engine 
+from app.domain.rules import engine
 from app.models import Base
 
 if __name__ == "__main__":
