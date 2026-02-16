@@ -9,7 +9,7 @@ if not DATABASE_URL:
    raise RuntimeError("DATABASE_URL environment variable not set")
 
 engine = create_engine(
-   DATABASE_URL,
+   DATABASE_URL.replace("postgresql://", "postgresql+psycopg://"),
    connect_args={"sslmode": "require"},
 )
 
