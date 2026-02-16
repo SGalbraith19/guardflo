@@ -1,0 +1,2 @@
+{"timestamp": "2026-02-12T00:30:28.713457", "event": "pricing_quote_generated", "org": "EnterpriseCorp", "tier": "large", "final_price": 69000.0}
+{"timestamp": "2026-02-12T02:06:05.982389", "event": "pricing_quote_generated", "org": "EnterpriseCorp", "tier": "large", "final_price": 69000.0}

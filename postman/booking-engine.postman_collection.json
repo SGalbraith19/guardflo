@@ -1,0 +1,107 @@
+{
+ "info": {
+   "name": "Booking Engine – Authoritative Contract",
+   "description": "Executable contract for the Booking Engine and AI Interpretation Service. This collection reflects frozen domain behavior.",
+   "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "variable": [
+   {
+     "key": "engine_base_url",
+     "value": "http://127.0.0.1:8000"
+   },
+   {
+     "key": "ai_base_url",
+     "value": "http://127.0.0.1:9001"
+   },
+   {
+     "key": "booking_id",
+     "value": ""
+   },
+   {
+     "key": "actor_id",
+     "value": "11111111-1111-1111-1111-111111111111"
+   }
+ ],
+ "item": [
+   {
+     "name": "Create Booking",
+     "request": {
+       "method": "POST",
+       "header": [{ "key": "Content-Type", "value": "application/json" }],
+       "url": "{{engine_base_url}}/bookings",
+       "body": {
+         "mode": "raw",
+         "raw": "{\n  \"metadata\": {\n    \"source\": \"postman\"\n  }\n}"
+       }
+     },
+     "event": [
+       {
+         "listen": "test",
+         "script": {
+           "exec": [
+             "pm.environment.set(\"booking_id\", pm.response.json().id);"
+           ]
+         }
+       }
+     ]
+   },
+   {
+     "name": "Valid Status Transition (PENDING → CONFIRMED)",
+     "request": {
+       "method": "PATCH",
+       "header": [{ "key": "Content-Type", "value": "application/json" }],
+       "url": "{{engine_base_url}}/bookings/{{booking_id}}/status",
+       "body": {
+         "mode": "raw",
+         "raw": "{\n  \"new_status\": \"CONFIRMED\",\n  \"actor_id\": \"{{actor_id}}\",\n  \"decision_context\": {\n    \"reason\": \"confirmed via postman\"\n  }\n}"
+       }
+     }
+   },
+   {
+     "name": "Invalid Status Transition (PENDING → COMPLETED)",
+     "request": {
+       "method": "PATCH",
+       "header": [{ "key": "Content-Type", "value": "application/json" }],
+       "url": "{{engine_base_url}}/bookings/{{booking_id}}/status",
+       "body": {
+         "mode": "raw",
+         "raw": "{\n  \"new_status\": \"COMPLETED\",\n  \"actor_id\": \"{{actor_id}}\",\n  \"decision_context\": {\n    \"reason\": \"this should fail\"\n  }\n}"
+       }
+     }
+   },
+   {
+     "name": "Send Event to AI",
+     "request": {
+       "method": "POST",
+       "header": [
+         { "key": "Content-Type", "value": "application/json" },
+         { "key": "X-Signature", "value": "dev-secret" }
+       ],
+       "url": "{{ai_base_url}}/events",
+       "body": {
+         "mode": "raw",
+         "raw": "{\n  \"event_type\": \"booking.status_changed\",\n  \"payload\": {\n    \"booking_id\": \"{{booking_id}}\",\n    \"old_status\": \"PENDING\",\n    \"new_status\": \"CONFIRMED\"\n  }\n}"
+       }
+     }
+   },
+   {
+     "name": "Record Approval",
+     "request": {
+       "method": "POST",
+       "header": [{ "key": "Content-Type", "value": "application/json" }],
+       "url": "{{ai_base_url}}/approvals",
+       "body": {
+         "mode": "raw",
+         "raw": "{\n  \"recommendation_id\": \"example-rec-1\",\n  \"decision\": \"approved\",\n  \"approved_by\": \"postman-user\",\n  \"approval_context\": \"manual test\"\n}"
+       }
+     }
+   },
+   {
+     "name": "Operational Summary Report",
+     "request": {
+       "method": "GET",
+       "url": "{{ai_base_url}}/reports/operational-summary"
+     }
+   }
+ ]
+}
