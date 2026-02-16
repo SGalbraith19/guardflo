@@ -8,8 +8,10 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
    raise RuntimeError("DATABASE_URL environment variable not set")
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
+engine = create_engine(
+   DATABASE_URL,
+   connect_args={"sslmode": "require"}
+)
 
 # Create tables automatically
 Base.metadata.create_all(bind=engine)
