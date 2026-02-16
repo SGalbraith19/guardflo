@@ -10,8 +10,13 @@ if not DATABASE_URL:
 
 engine = create_engine(
    DATABASE_URL,
-   connect_args={"sslmode": "require"}
+   connect_args={"sslmode": "require"},
 )
 
-# Create tables automatically
+SessionLocal = sessionmaker(
+   autocommit=False,
+   autoflush=False,
+   bind=engine
+)
+
 Base.metadata.create_all(bind=engine)
