@@ -8,8 +8,6 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-print("DATABASE_URL:", DATABASE_URL)  # ← PUT IT HERE
-
 if not DATABASE_URL:
    raise RuntimeError("DATABASE_URL environment variable not set")
 
@@ -24,4 +22,13 @@ SessionLocal = sessionmaker(
    bind=engine,
 )
 
+# ✅ ADD THIS (this is what your app needs)
+def get_db():
+   db = SessionLocal()
+   try:
+       yield db
+   finally:
+       db.close()
+
+# Create tables
 Base.metadata.create_all(bind=engine)
