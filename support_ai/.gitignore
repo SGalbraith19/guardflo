@@ -1,5 +1,0 @@
-.env
-tenancy.db
-*.db
-venv/
-__pycache__/

@@ -1,6 +1,5 @@
 .env
-.env.*
+tenancy.db
+*.db
 venv/
 __pycache__/
-*.db
-.DS_Store
