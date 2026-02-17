@@ -11,6 +11,7 @@ import os
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from pydantic import BaseModel
 
 # Database
 from database import get_db
@@ -37,6 +38,10 @@ from tenancy.service import resolve_organisation
 load_dotenv()
 
 app = FastAPI(title="GuardFlo Financial Enforcement Gate")
+
+class VerifyDecisionRequest (BaseModel):
+    decision_id: str
+    signature: str
 
 # ============================================================
 # ROOT
@@ -119,6 +124,31 @@ def financial_decision(
 
    signature = sign_decision(decision_payload)
    decision_payload["signature"] = signature
+
+@app.post("/decision/verify")
+def verify_decision(data: VerifyDecisionRequest, db: Session = Depends(get_db)):
+   decision = (
+       db.query(FinancialLedger)
+       .filter(FinancialLedger.id == data.decision_id)
+       .first()
+   )
+
+   if not decision:
+       raise HTTPException(status_code=404, detail="Decision not found")
+
+   payload = {
+       "decision_id": str(decision.id),
+       "tenant_id": decision.tenant_id,
+       "policy_version": decision.policy_version,
+       "decision": decision.decision,
+   }
+
+   valid = verify_signature(payload, data.signature)
+
+   return {
+       "decision_id": decision.id,
+       "valid": valid,
+   }
 
    # ============================================================
    # HASH CHAIN LEDGER
