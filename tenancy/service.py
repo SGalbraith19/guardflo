@@ -83,7 +83,7 @@ def resolve_organisation(api_key: str) -> Optional[Organisation]:
 
    if DEPLOYMENT_MODE == "dedicated":
        return Organisation(
-           org_id=os.getenv("GUARDFLO_ORG_ID", "org_dedicated"),
+           id=os.getenv("GUARDFLO_ID", "org_dedicated"),
            org_name=os.getenv("GUARDFLO_ORG_NAME", "DedicatedEnterprise"),
            tier=os.getenv("GUARDFLO_ORG_TIER", "enterprise"),
            api_key="dedicated",

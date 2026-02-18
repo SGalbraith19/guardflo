@@ -22,7 +22,7 @@ from database import Base
 class Organisation(Base):
    __tablename__ = "organisations"
 
-   org_id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+   id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
    org_name = Column(String, unique=True, nullable=False)
 
    # Subscription & Tier
@@ -49,7 +49,7 @@ class FinancialDecision(Base):
    __tablename__ = "financial_decisions"
 
    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-   org_id = Column(String, ForeignKey("organisations.org_id"), nullable=False)
+   id = Column(String, ForeignKey("organisations.id"), nullable=False)
 
    approved = Column(Boolean)
    risk_score = Column(Float)
@@ -67,7 +67,7 @@ class Quote(Base):
    __tablename__ = "quotes"
 
    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-   org_id = Column(String, ForeignKey("organisations.org_id"), nullable=False)
+   id = Column(String, ForeignKey("organisations.id"), nullable=False)
 
    tier = Column(String)
 
@@ -91,7 +91,7 @@ class UsageRecord(Base):
    __tablename__ = "usage_records"
 
    id = Column(Integer, primary_key=True, autoincrement=True)
-   org_id = Column(String, ForeignKey("organisations.org_id"), nullable=False)
+   id = Column(String, ForeignKey("organisations.id"), nullable=False)
 
    month = Column(String, nullable=False)  # e.g. "2026-02"
    decision_count = Column(Integer, default=0)
