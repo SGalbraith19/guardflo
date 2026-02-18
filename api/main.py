@@ -65,9 +65,9 @@ app.add_exception_handler(
 # Root
 # =========================================================
 
-@app.get("/")
+@app.get("/health")
 def root():
-   return {"status": "Financial enforcement API live"}
+   return {"status": "ok"}
 
 # =========================================================
 # Verify Signature Request Model
