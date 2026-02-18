@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 # Database
 from database import get_db, engine
-from tenancy.models import Base
+from database import Base
 
 # Models
 from tenancy.models import Organisation
