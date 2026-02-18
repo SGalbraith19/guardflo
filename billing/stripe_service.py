@@ -20,7 +20,7 @@ def create_checkout_session(amount: int, organisation_name: str, id: int):
            }
        ],
        metadata={
-           "id": id
+           "org_id": id
        },
        success_url="http://localhost:8000/success",
        cancel_url="http://localhost:8000/cancel",
