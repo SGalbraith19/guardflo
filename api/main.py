@@ -14,7 +14,7 @@ from slowapi.errors import RateLimitExceeded
 from pydantic import BaseModel
 
 # Database
-from api import router
+from api.router import router
 from database import get_db, engine
 from database import Base
 
