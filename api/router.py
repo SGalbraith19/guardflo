@@ -1,4 +1,6 @@
-from api import router
+from fastapi import APIRouter
+
+router = APIRouter
 
 
 @router.get("/support/audit")

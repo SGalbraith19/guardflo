@@ -6,6 +6,7 @@ from datetime import datetime
 from uuid import uuid4
 import hashlib
 import json
+from api.routes_ai import router as ai_router
 
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -40,6 +41,10 @@ load_dotenv()
 
 app = FastAPI(title="GuardFlo Financial Enforcement Gate")
 
+@app.get("/health")
+def root():
+   return {"status": "ok"}
+
 app.include_router(router)
 
 @app.on_event("startup")
@@ -68,9 +73,7 @@ app.add_exception_handler(
 # Root
 # =========================================================
 
-@app.get("/health")
-def root():
-   return {"status": "ok"}
+
 
 # =========================================================
 # Verify Signature Request Model
