@@ -1,106 +1,91 @@
-# ai_service/report_generator.py
-
-import sqlite3
-import json
 from datetime import datetime
-
-DB_PATH = "ai_data.db"
+from sqlalchemy.orm import Session
+from database import SessionLocal
+from models import (
+   AIEvent,
+   AIExplanation,
+   AIRisk,
+   AIRecommendation,
+   AIApproval,
+)
 
 
 def generate_operational_summary(limit: int = 50) -> dict:
-   """
-   Generate a human-readable operational summary report
-   based entirely on AI-owned, immutable records.
-   """
+   db: Session = SessionLocal()
 
-   conn = sqlite3.connect(DB_PATH)
-   cur = conn.cursor()
+   try:
+       # ---- Fetch recent events ----
+       events = (
+           db.query(AIEvent)
+           .order_by(AIEvent.received_at.desc())
+           .limit(limit)
+           .all()
+       )
 
-   # --- Fetch recent events ---
-   cur.execute("""
-       SELECT id, event_type, payload, received_at
-       FROM ai_events
-       ORDER BY received_at DESC
-       LIMIT ?
-   """, (limit,))
-   events = cur.fetchall()
-
-   # --- Fetch explanations ---
-   cur.execute("""
-       SELECT event_id, explanation
-       FROM ai_explanations
-   """)
-   explanations = {
-       row[0]: json.loads(row[1])
-       for row in cur.fetchall()
-   }
-
-   # --- Fetch risks ---
-   cur.execute("""
-       SELECT risk_type, data, detected_at
-       FROM ai_risks
-       ORDER BY detected_at DESC
-   """)
-   risks = [
-       {
-           "risk_type": r[0],
-           "details": json.loads(r[1]),
-           "detected_at": r[2],
+       # ---- Fetch explanations ----
+       explanations = {
+           e.event_id: e.explanation
+           for e in db.query(AIExplanation).all()
        }
-       for r in cur.fetchall()
-   ]
 
-   # --- Fetch recommendations ---
-   cur.execute("""
-       SELECT recommendation, created_at
-       FROM ai_recommendations
-       ORDER BY created_at DESC
-   """)
-   recommendations = [
-       {
-           "recommendation": json.loads(r[0]),
-           "created_at": r[1],
+       # ---- Fetch risks ----
+       risks = [
+           {
+               "risk_type": r.risk_type,
+               "details": r.data,
+               "detected_at": r.detected_at,
+           }
+           for r in db.query(AIRisk)
+           .order_by(AIRisk.detected_at.desc())
+           .all()
+       ]
+
+       # ---- Fetch recommendations ----
+       recommendations = [
+           {
+               "recommendation": r.recommendation,
+               "created_at": r.created_at,
+           }
+           for r in db.query(AIRecommendation)
+           .order_by(AIRecommendation.created_at.desc())
+           .all()
+       ]
+
+       # ---- Fetch approvals ----
+       approvals = [
+           {
+               "recommendation_id": a.recommendation_id,
+               "decision": a.decision,
+               "approved_by": a.approved_by,
+               "approval_context": a.approval_context,
+               "approved_at": a.approved_at,
+           }
+           for a in db.query(AIApproval)
+           .order_by(AIApproval.approved_at.desc())
+           .all()
+       ]
+
+       # ---- Assemble report ----
+       report_events = [
+           {
+               "event_id": e.id,
+               "event_type": e.event_type,
+               "payload": e.payload,
+               "received_at": e.received_at,
+               "ai_explanation": explanations.get(e.id),
+           }
+           for e in events
+       ]
+
+       return {
+           "report_type": "Operational Summary",
+           "generated_at": datetime.utcnow().isoformat(),
+           "event_count": len(report_events),
+           "events": report_events,
+           "risks_detected": risks,
+           "recommendations": recommendations,
+           "approvals": approvals,
        }
-       for r in cur.fetchall()
-   ]
 
-   # --- Fetch approvals ---
-   cur.execute("""
-       SELECT recommendation_id, decision, approved_by, approval_context, approved_at
-       FROM ai_approvals
-       ORDER BY approved_at DESC
-   """)
-   approvals = [
-       {
-           "recommendation_id": r[0],
-           "decision": r[1],
-           "approved_by": r[2],
-           "approval_context": r[3],
-           "approved_at": r[4],
-       }
-       for r in cur.fetchall()
-   ]
-
-   conn.close()
-
-   # --- Assemble report ---
-   report_events = []
-   for e in events:
-       event_id = e[0]
-       report_events.append({
-           "event_id": event_id,
-           "event_type": e[1],
-           "payload": json.loads(e[2]),
-           "received_at": e[3],
-           "ai_explanation": explanations.get(event_id),
-       })
-
-   return {
-       "report_type": "Operational Summary",
-       "generated_at": datetime.utcnow().isoformat(),
-       "event_count": len(report_events),
-       "events": report_events,
-       "risks_detected": risks,
-       "recommendations": recommendations,
-       "approvals": approvals,
-   }
+   finally:
+       db.close()

@@ -3,10 +3,9 @@ from sqlalchemy.orm import sessionmaker
 from tenancy.models import Base
 
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from database import DATABASE_URL
 from tenancy.models import Organisation
-
-DATABASE_URL = "sqlite:///./tenancy.db"
+from database import SessionLocal
 
 engine = create_engine(
    DATABASE_URL,
