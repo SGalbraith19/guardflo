@@ -30,14 +30,14 @@ async def stripe_webhook(request: Request):
 
        session = event["data"]["object"]
 
-       org_id = session["metadata"].get("org_id")
+       id = session["metadata"].get("id")
        selected_tier = session["metadata"].get("tier")
 
        db = SessionLocal()
 
        try:
            org = db.query(Organisation).filter(
-               Organisation.id == org_id
+               Organisation.id == id
            ).first()
 
            if org:
