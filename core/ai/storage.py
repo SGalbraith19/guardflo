@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 
 from database import SessionLocal
-from models import (
+from core.models import (
    AIEvent,
    AIExplanation,
    AIRisk,

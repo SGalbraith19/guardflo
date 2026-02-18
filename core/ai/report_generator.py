@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import (
+from core.models import (
    AIEvent,
    AIExplanation,
    AIRisk,
