@@ -39,7 +39,9 @@ load_dotenv()
 
 app = FastAPI(title="GuardFlo Financial Enforcement Gate")
 
-Base.metadata.create_all(bind=engine)
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
 
 # =========================================================
 # Rate Limiting
