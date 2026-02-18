@@ -9,7 +9,6 @@ from core.risk_engine import detect_risks
 from core.ai.recommendation_engine import generate_recommendations
 from core.ai.report_generator import generate_operational_summary
 from core.ai.storage import (
-   init_db,
    store_event,
    store_explanation,
    store_risks,
@@ -20,9 +19,6 @@ from core.ai.storage import (
 # --- Configuration ---
 WEBHOOK_SECRET = os.getenv("AI_WEBHOOK_SECRET", "dev-secret")
 USE_LLM = os.getenv("USE_LLM_EXPLAINER", "false").lower() == "true"
-
-# Initialise AI-owned tables (now using main DB)
-init_db()
 
 
 # --- Security ---
