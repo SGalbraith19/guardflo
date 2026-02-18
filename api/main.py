@@ -13,6 +13,7 @@ from slowapi.errors import RateLimitExceeded
 from pydantic import BaseModel
 
 # Database
+from api import router
 from database import get_db, engine
 from database import Base
 
@@ -38,6 +39,8 @@ from tenancy.service import resolve_organisation
 load_dotenv()
 
 app = FastAPI(title="GuardFlo Financial Enforcement Gate")
+
+app.include_router(router)
 
 @app.on_event("startup")
 def startup():
