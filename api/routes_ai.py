@@ -11,12 +11,6 @@ from core.ai.ai_pipeline import (
 router = APIRouter()
 
 
-# --- Health Check ---
-@router.get("/ai/health")
-def health_check():
-   return {"status": "ok"}
-
-
 # --- Webhook Ingestion ---
 @router.post("/ai/events")
 async def receive_event(request: Request):
