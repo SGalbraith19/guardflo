@@ -4,8 +4,10 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+print("DATABASE_URL =", DATABASE_URL)
+
 if not DATABASE_URL:
-   raise RuntimeError("DATABASE_URL environment variable is not set")
+   raise RuntimeError("DATABASE_URL not set")
 
 engine = create_engine(
    DATABASE_URL,
@@ -26,3 +28,4 @@ def get_db():
        yield db
    finally:
        db.close()
+
