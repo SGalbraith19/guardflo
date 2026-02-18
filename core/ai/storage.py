@@ -1,202 +1,97 @@
-# ai_service/storage.py
-
-import sqlite3
-import json
+from sqlalchemy.orm import Session
 from datetime import datetime
-from typing import Dict, List
+import json
 
-DB_PATH = "ai_data.db"
+from database import SessionLocal
+from models import (
+   AIEvent,
+   AIExplanation,
+   AIRisk,
+   AIRecommendation,
+   AIApproval,
+)
 
 
-# ======================================================
-# Database initialisation
-# ======================================================
-def init_db():
-   conn = sqlite3.connect(DB_PATH)
-   cur = conn.cursor()
-
-   # Raw immutable events received by AI
-   cur.execute("""
-       CREATE TABLE IF NOT EXISTS ai_events (
-           id INTEGER PRIMARY KEY AUTOINCREMENT,
-           event_type TEXT NOT NULL,
-           payload TEXT NOT NULL,
-           received_at TEXT NOT NULL
+def store_event(event: dict) -> int:
+   db: Session = SessionLocal()
+   try:
+       db_event = AIEvent(
+           event_type=event.get("event_type"),
+           payload=json.dumps(event.get("payload")),
+           received_at=event.get("received_at") or datetime.utcnow().isoformat(),
        )
-   """)
+       db.add(db_event)
+       db.commit()
+       db.refresh(db_event)
+       return db_event.id
+   finally:
+       db.close()
 
-   # AI explanations (derived, non-authoritative)
-   cur.execute("""
-       CREATE TABLE IF NOT EXISTS ai_explanations (
-           id INTEGER PRIMARY KEY AUTOINCREMENT,
-           event_id INTEGER NOT NULL,
-           explanation TEXT NOT NULL,
-           confidence REAL,
-           model TEXT,
-           created_at TEXT NOT NULL,
-           FOREIGN KEY(event_id) REFERENCES ai_events(id)
+
+def store_explanation(event_id: int, explanation: dict):
+   db: Session = SessionLocal()
+   try:
+       db_exp = AIExplanation(
+           event_id=event_id,
+           explanation=json.dumps(explanation),
+           confidence=explanation.get("confidence"),
+           model=explanation.get("model"),
+           created_at=datetime.utcnow().isoformat(),
        )
-   """)
-
-   # Detected risks
-   cur.execute("""
-       CREATE TABLE IF NOT EXISTS ai_risks (
-           id INTEGER PRIMARY KEY AUTOINCREMENT,
-           risk_type TEXT NOT NULL,
-           data TEXT NOT NULL,
-           detected_at TEXT NOT NULL
-       )
-   """)
-
-   # Non-binding recommendations
-   cur.execute("""
-       CREATE TABLE IF NOT EXISTS ai_recommendations (
-           id INTEGER PRIMARY KEY AUTOINCREMENT,
-           recommendation TEXT NOT NULL,
-           created_at TEXT NOT NULL
-       )
-   """)
-
-   conn.commit()
-   conn.close()
+       db.add(db_exp)
+       db.commit()
+   finally:
+       db.close()
 
 
-# ======================================================
-# Persistence helpers
-# ======================================================
-def store_event(event: Dict) -> int:
-   conn = sqlite3.connect(DB_PATH)
-   cur = conn.cursor()
-
-   cur.execute(
-       """
-       INSERT INTO ai_events (event_type, payload, received_at)
-       VALUES (?, ?, ?)
-       """,
-       (
-           event.get("event_type"),
-           json.dumps(event.get("payload")),
-           event.get("_received_at"),
-       )
-   )
-
-   event_id = cur.lastrowid
-   conn.commit()
-   conn.close()
-   return event_id
-
-
-def store_explanation(event_id: int, explanation: Dict):
-   conn = sqlite3.connect(DB_PATH)
-   cur = conn.cursor()
-
-   cur.execute(
-       """
-       INSERT INTO ai_explanations (
-           event_id, explanation, confidence, model, created_at
-       )
-       VALUES (?, ?, ?, ?, ?)
-       """,
-       (
-           event_id,
-           json.dumps(explanation),
-           explanation.get("confidence"),
-           explanation.get("model"),
-           datetime.utcnow().isoformat(),
-       )
-   )
-
-   conn.commit()
-   conn.close()
-
-
-def store_risks(risks: List[Dict]):
-   conn = sqlite3.connect(DB_PATH)
-   cur = conn.cursor()
-
-   for risk in risks:
-       cur.execute(
-           """
-           INSERT INTO ai_risks (risk_type, data, detected_at)
-           VALUES (?, ?, ?)
-           """,
-           (
-               risk.get("type"),
-               json.dumps(risk),
-               datetime.utcnow().isoformat(),
+def store_risks(risks: list[dict]):
+   db: Session = SessionLocal()
+   try:
+       for risk in risks:
+           db_risk = AIRisk(
+               risk_type=risk.get("type"),
+               data=json.dumps(risk),
+               detected_at=datetime.utcnow().isoformat(),
            )
-       )
+           db.add(db_risk)
+       db.commit()
+   finally:
+       db.close()
 
-   conn.commit()
-   conn.close()
 
-
-def store_recommendations(recommendations: List[Dict]):
-   conn = sqlite3.connect(DB_PATH)
-   cur = conn.cursor()
-
-   for rec in recommendations:
-       cur.execute(
-           """
-           INSERT INTO ai_recommendations (recommendation, created_at)
-           VALUES (?, ?)
-           """,
-           (
-               json.dumps(rec),
-               datetime.utcnow().isoformat(),
+def store_recommendations(recommendations: list[dict]):
+   db: Session = SessionLocal()
+   try:
+       for rec in recommendations:
+           db_rec = AIRecommendation(
+               recommendation=json.dumps(rec),
+               created_at=datetime.utcnow().isoformat(),
            )
-       )
-     # Human / system approvals of AI recommendations
-   cur.execute("""
-       CREATE TABLE IF NOT EXISTS ai_approvals (
-           id INTEGER PRIMARY KEY AUTOINCREMENT,
-           recommendation_id TEXT NOT NULL,
-           decision TEXT NOT NULL,  -- approved | rejected
-           approved_by TEXT NOT NULL,
-           approval_context TEXT,
-           approved_at TEXT NOT NULL
-       )
-   """) 
+           db.add(db_rec)
+       db.commit()
+   finally:
+       db.close()
 
-   conn.commit()
-   conn.close()
 
 def store_approval(
    recommendation_id: str,
    decision: str,
    approved_by: str,
-   approval_context: str = None,
+   approval_context: str | None = None,
 ):
-   """
-   Persist a human or system approval/rejection.
-   This does NOT trigger any execution.
-   """
-
-   if decision not in ("approved", "rejected"):
+   if decision not in ["approved", "rejected"]:
        raise ValueError("decision must be 'approved' or 'rejected'")
 
-   conn = sqlite3.connect(DB_PATH)
-   cur = conn.cursor()
-
-   cur.execute(
-       """
-       INSERT INTO ai_approvals (
-           recommendation_id,
-           decision,
-           approved_by,
-           approval_context,
-           approved_at
+   db: Session = SessionLocal()
+   try:
+       db_approval = AIApproval(
+           recommendation_id=recommendation_id,
+           decision=decision,
+           approved_by=approved_by,
+           approval_context=approval_context,
+           approved_at=datetime.utcnow().isoformat(),
        )
-       VALUES (?, ?, ?, ?, ?)
-       """,
-       (
-           recommendation_id,
-           decision,
-           approved_by,
-           approval_context,
-           datetime.utcnow().isoformat(),
-       )
-   )
-
-   conn.commit()
-   conn.close()
+       db.add(db_approval)
+       db.commit()
+   finally:
+       db.close()
