@@ -5,15 +5,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
-   raise RuntimeError("DATABASE_URL not set")
-
-# 🔥 CRITICAL FIX
-if DATABASE_URL.startswith("postgres://"):
-   DATABASE_URL = DATABASE_URL.replace(
-       "postgres://",
-       "postgresql+psycopg2://",
-       1
-   )
+   raise RuntimeError("DATABASE_URL environment variable is not set")
 
 engine = create_engine(
    DATABASE_URL,
@@ -27,3 +19,10 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
+def get_db():
+   db = SessionLocal()
+   try:
+       yield db
+   finally:
+       db.close()

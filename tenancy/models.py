@@ -8,16 +8,16 @@ from sqlalchemy import (
    JSON,
    ForeignKey,
 )
-from sqlalchemy.orm import declarative_base
 from datetime import datetime
 import uuid
 
-Base = declarative_base()
+# 🔥 IMPORTANT — import Base from database
+from database import Base
 
 
-# ============================================================
+# =====================================================
 # TENANT / ORGANISATION
-# ============================================================
+# =====================================================
 
 class Organisation(Base):
    __tablename__ = "organisations"
@@ -25,11 +25,11 @@ class Organisation(Base):
    org_id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
    org_name = Column(String, unique=True, nullable=False)
 
-   # Subscription + Tier
+   # Subscription & Tier
    tier = Column(String, nullable=False, default="free")  # free | small | medium | large
    subscription_active = Column(Boolean, default=False)
 
-   # Security
+   # API Security
    api_key = Column(String, unique=True, nullable=False)
 
    # Stripe
@@ -41,9 +41,9 @@ class Organisation(Base):
    active = Column(Boolean, default=True)
 
 
-# ============================================================
+# =====================================================
 # FINANCIAL DECISIONS
-# ============================================================
+# =====================================================
 
 class FinancialDecision(Base):
    __tablename__ = "financial_decisions"
@@ -59,9 +59,9 @@ class FinancialDecision(Base):
    created_at = Column(DateTime, default=datetime.utcnow)
 
 
-# ============================================================
+# =====================================================
 # QUOTES
-# ============================================================
+# =====================================================
 
 class Quote(Base):
    __tablename__ = "quotes"
@@ -83,9 +83,9 @@ class Quote(Base):
    created_at = Column(DateTime, default=datetime.utcnow)
 
 
-# ============================================================
+# =====================================================
 # USAGE METERING
-# ============================================================
+# =====================================================
 
 class UsageRecord(Base):
    __tablename__ = "usage_records"
