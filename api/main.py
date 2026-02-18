@@ -13,12 +13,14 @@ from slowapi.errors import RateLimitExceeded
 from pydantic import BaseModel
 
 # Database
-from database import get_db
+from database import get_db, engine
+from tenancy.models import Base
 
 # Models
 from tenancy.models import Organisation
 from models.financial_ledger import FinancialLedger
 from models.policy_registry import PolicyRegistry
+
 
 # Core
 from core.decision_engine import run_financial_decision
@@ -36,6 +38,8 @@ from tenancy.service import resolve_organisation
 load_dotenv()
 
 app = FastAPI(title="GuardFlo Financial Enforcement Gate")
+
+Base.metadata.create_all(bind=engine)
 
 # =========================================================
 # Rate Limiting
