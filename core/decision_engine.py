@@ -11,20 +11,13 @@ def run_financial_decision(request, organisation, policy):
    if not capabilities:
        raise ValueError(f"Unknown tier: {tier}")
 
-   approved, risk_score, violations = evaluate_financial_rules(request,policy)
+   approved, risk_score, violations = evaluate_financial_rules(request, policy)
 
-   response = {
-       "approved": approved,
-   }
+   explanation = None
+   if capabilities.get("explainability"):
+       explanation = generate_explanation(violations)
 
-   if capabilities["risk_scoring"]:
-       response["risk_score"] = risk_score
-       response["violations"] = violations
-
-   if capabilities["explainability"]:
-       response["explanation"] = generate_explanation(violations)
-
-   if capabilities["audit_logging"]:
+   if capabilities.get("audit_logging"):
        record_support_event({
            "event": "financial_decision",
            "organisation": organisation.name,
@@ -32,4 +25,10 @@ def run_financial_decision(request, organisation, policy):
            "approved": approved,
        })
 
-   return response
+   # 🔒 ALWAYS RETURN SAME SHAPE
+   return {
+       "approved": approved,
+       "risk_score": risk_score,
+       "violations": violations,
+       "explanation": explanation,
+   }

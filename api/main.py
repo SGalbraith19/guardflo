@@ -6,23 +6,22 @@ from datetime import datetime
 from uuid import uuid4
 import hashlib
 import json
-from api.routes_ai import router as ai_router
+
+from pydantic import BaseModel
 
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from pydantic import BaseModel
 
 # Database
-from api.router import router
-from database import get_db, engine
-from database import Base
+from database import get_db, engine, Base
 
 # Models
 from tenancy.models import Organisation
 from models.financial_ledger import FinancialLedger
 from models.policy_registry import PolicyRegistry
-
+from tenancy.tier_policy import TIER_CAPABILITIES
+from tenancy.service import resolve_organisation
 
 # Core
 from core.decision_engine import run_financial_decision
@@ -32,28 +31,21 @@ from core.financial_schema import (
    FinancialDecisionResponse,
 )
 
-# Billing
-from billing.billing import get_monthly_usage, create_checkout_session
-from tenancy.tier_policy import TIER_LIMITS
-from tenancy.service import resolve_organisation
+# --------------------------------------------------
+# App Setup
+# --------------------------------------------------
 
 load_dotenv()
 
 app = FastAPI(title="GuardFlo Financial Enforcement Gate")
 
-@app.get("/health")
-def root():
-   return {"status": "ok"}
-
-app.include_router(router)
-
 @app.on_event("startup")
 def startup():
-    Base.metadata.create_all(bind=engine)
+   Base.metadata.create_all(bind=engine)
 
-# =========================================================
+# --------------------------------------------------
 # Rate Limiting
-# =========================================================
+# --------------------------------------------------
 
 def tenant_key(request: Request):
    return request.headers.get("x-api-key", get_remote_address(request))
@@ -69,48 +61,68 @@ app.add_exception_handler(
    ),
 )
 
-# =========================================================
-# Root
-# =========================================================
+# --------------------------------------------------
+# Health
+# --------------------------------------------------
 
+@app.get("/health")
+def root():
+   return {"status": "ok"}
 
-
-# =========================================================
-# Verify Signature Request Model
-# =========================================================
-
-class VerifyDecisionRequest(BaseModel):
-   decision_id: str
-   signature: str
-
-# =========================================================
+# ==================================================
 # FINANCIAL DECISION ENDPOINT
-# =========================================================
+# ==================================================
 
 @app.post("/decision/financial", response_model=FinancialDecisionResponse)
 def financial_decision(
    request: FinancialDecisionRequest,
    db: Session = Depends(get_db),
 ):
+
+   # ---------------------------------------------
    # 1️⃣ Resolve Organisation
+   # ---------------------------------------------
+
    organisation = resolve_organisation(request.tenant_id)
 
-   if not organisation or not organisation.subscription_active:
+   if organisation is None or not organisation.subscription_active:
        raise HTTPException(status_code=403, detail="Subscription inactive")
 
-   # 2️⃣ Tier enforcement
-   tier_limits = TIER_LIMITS.get(organisation.tier)
+   # ---------------------------------------------
+   # 2️⃣ Tier Enforcement (DB-backed monthly count)
+   # ---------------------------------------------
 
-   if tier_limits and tier_limits.get("monthly_decisions"):
-       usage = get_monthly_usage(organisation.id)
+   tier = organisation.tier
+   tier_limits = TIER_CAPABILITIES.get(tier)
 
-       if usage >= tier_limits["monthly_decisions"]:
-           raise HTTPException(
-               status_code=403,
-               detail="Monthly decision limit exceeded",
-           )
+   if not tier_limits:
+       raise HTTPException(status_code=400, detail="Unknown tier")
 
-   # 3️⃣ Lock policy version
+   first_of_month = datetime.utcnow().replace(
+       day=1,
+       hour=0,
+       minute=0,
+       second=0,
+       microsecond=0,
+   )
+
+   monthly_count = (
+       db.query(FinancialLedger)
+       .filter(FinancialLedger.tenant_id == request.tenant_id)
+       .filter(FinancialLedger.created_at >= first_of_month)
+       .count()
+   )
+
+   if monthly_count >= tier_limits["monthly_decisions"]:
+       raise HTTPException(
+           status_code=403,
+           detail="Monthly decision limit exceeded",
+       )
+
+   # ---------------------------------------------
+   # 3️⃣ Lock Policy Version (NO auto-select latest)
+   # ---------------------------------------------
+
    policy = (
        db.query(PolicyRegistry)
        .filter(PolicyRegistry.version == str(request.policy_version))
@@ -118,32 +130,41 @@ def financial_decision(
    )
 
    if not policy:
-       raise HTTPException(status_code=404, detail="Policy version not found")
+       raise HTTPException(
+           status_code=404,
+           detail="Policy version not found",
+       )
 
-   # 4️⃣ Run deterministic engine
+   # ---------------------------------------------
+   # 4️⃣ Run Deterministic Engine
+   # ---------------------------------------------
+
    result = run_financial_decision(request, organisation, policy)
 
    decision_id = str(uuid4())
    timestamp = datetime.utcnow().isoformat()
 
    decision_payload = {
-   "decision_id": decision_id,
-   "tenant_id": request.tenant_id,
-   "policy_version": policy.version,
-   "timestamp": timestamp,
-   "approved": result["approved"],
-   "risk_score": result.get("risk_score"),
-   "violations": result.get("violations"),
-   "explanation": result.get("explanation"),
-}
+       "decision_id": decision_id,
+       "tenant_id": request.tenant_id,
+       "policy_version": policy.version,
+       "timestamp": timestamp,
+       "approved": result["approved"],
+       "risk_score": result["risk_score"],
+       "violations": result["violations"],
+       "explanation": result["explanation"],
+   }
 
-   # 5️⃣ Sign decision
+   # ---------------------------------------------
+   # 5️⃣ Sign Decision
+   # ---------------------------------------------
+
    signature = sign_decision(decision_payload)
    decision_payload["signature"] = signature
 
-   # =====================================================
-   # 6️⃣ HASH CHAIN LEDGER WRITE (Append Only)
-   # =====================================================
+   # ---------------------------------------------
+   # 6️⃣ Hash Chain Ledger (Append Only)
+   # ---------------------------------------------
 
    request_hash = hashlib.sha256(
        json.dumps(request.dict(), sort_keys=True).encode()
@@ -156,7 +177,7 @@ def financial_decision(
        .first()
    )
 
-   previous_hash = previous_entry.entry_hash if previous_entry else None
+   previous_hash = previous_entry.entry_hash if previous_entry else "GENESIS"
 
    entry_string = json.dumps(
        {
@@ -189,15 +210,21 @@ def financial_decision(
 
    return FinancialDecisionResponse(**decision_payload)
 
-# =========================================================
-# SIGNATURE VERIFICATION ENDPOINT
-# =========================================================
+# ==================================================
+# SIGNATURE VERIFICATION
+# ==================================================
+
+class VerifyDecisionRequest(BaseModel):
+   decision_id: str
+   signature: str
+
 
 @app.post("/decision/verify")
 def verify_decision(
    data: VerifyDecisionRequest,
    db: Session = Depends(get_db),
 ):
+
    decision = (
        db.query(FinancialLedger)
        .filter(FinancialLedger.id == data.decision_id)
@@ -221,12 +248,16 @@ def verify_decision(
        "valid": valid,
    }
 
-# =========================================================
-# LEDGER VALIDATION ENDPOINT (Tamper Detection)
-# =========================================================
+# ==================================================
+# LEDGER VALIDATION (Tamper Detection)
+# ==================================================
 
 @app.get("/ledger/validate/{tenant_id}")
-def validate_ledger(tenant_id: str, db: Session = Depends(get_db)):
+def validate_ledger(
+   tenant_id: str,
+   db: Session = Depends(get_db),
+):
+
    entries = (
        db.query(FinancialLedger)
        .filter(FinancialLedger.tenant_id == tenant_id)
@@ -237,6 +268,7 @@ def validate_ledger(tenant_id: str, db: Session = Depends(get_db)):
    previous_hash = None
 
    for entry in entries:
+
        entry_string = json.dumps(
            {
                "id": str(entry.id),
@@ -258,7 +290,7 @@ def validate_ledger(tenant_id: str, db: Session = Depends(get_db)):
                "error": f"Hash mismatch at entry {entry.id}",
            }
 
-       if entry.previous_hash != previous_hash:
+       if previous_hash and entry.previous_hash != previous_hash:
            return {
                "valid": False,
                "error": f"Chain broken at entry {entry.id}",

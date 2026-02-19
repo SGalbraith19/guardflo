@@ -13,7 +13,7 @@ def evaluate_financial_rules(request, policy):
    risk_score = 0
 
    # Amount risk
-   if request.amount > 10000:
+   if request.amount > MAX_AUTO_APPROVAL_AMOUNT:
        risk_score += 40
        violations.append("High amount")
 
