@@ -127,13 +127,15 @@ def financial_decision(
    timestamp = datetime.utcnow().isoformat()
 
    decision_payload = {
-       "decision_id": decision_id,
-       "tenant_id": request.tenant_id,
-       "policy_version": policy.version,
-       "timestamp": timestamp,
-       "decision": result["approved"],
-       "reason_codes": result.get("violations", []),
-   }
+   "decision_id": decision_id,
+   "tenant_id": request.tenant_id,
+   "policy_version": policy.version,
+   "timestamp": timestamp,
+   "approved": result["approved"],
+   "risk_score": result.get("risk_score"),
+   "violations": result.get("violations"),
+   "explanation": result.get("explanation"),
+}
 
    # 5️⃣ Sign decision
    signature = sign_decision(decision_payload)
