@@ -118,7 +118,7 @@ def financial_decision(
    )
 
    if not policy:
-       raise HTTPException(status_code=400, detail="Invalid policy version")
+       raise HTTPException(status_code=404, detail="Policy version not found")
 
    # 4️⃣ Run deterministic engine
    result = run_financial_decision(request, organisation, policy)

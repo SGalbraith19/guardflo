@@ -7,15 +7,15 @@ MAX_APPROVAL_DEPTH = 2
 MAX_FAN_OUT = 5
 
 
-def evaluate_financial_rules(request):
+def evaluate_financial_rules(request, policy):
 
    violations = []
    risk_score = 0
 
    # Amount risk
-   if request.amount > 100000:
+   if request.amount > 10000:
        risk_score += 40
-       violations.append("High transaction amount")
+       violations.append("High amount")
 
    # Vendor risk
    risk_score += request.vendor_risk_score * 30
