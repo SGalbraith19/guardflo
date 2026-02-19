@@ -131,8 +131,8 @@ def financial_decision(
        "tenant_id": request.tenant_id,
        "policy_version": policy.version,
        "timestamp": timestamp,
-       "decision": result["decision"],
-       "reason_codes": result["reason_codes"],
+       "decision": result["approved"],
+       "reason_codes": result.get("violations", []),
    }
 
    # 5️⃣ Sign decision
