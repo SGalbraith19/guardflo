@@ -7,10 +7,12 @@ from sqlalchemy import pool
 from alembic import context
 
 from dotenv import load_dotenv
+from pathlib import Path
 from tenancy.models import Base  # IMPORTANT: match your project structure
 
 # Load environment variables
-load_dotenv()
+env_path = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=env_path)
 
 config = context.config
 
