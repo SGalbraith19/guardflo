@@ -102,7 +102,7 @@ def financial_decision(
    tier_limits = TIER_LIMITS.get(organisation.tier)
 
    if tier_limits and tier_limits.get("monthly_decisions"):
-       usage = get_monthly_usage(organisation.org_name)
+       usage = get_monthly_usage(organisation.id)
 
        if usage >= tier_limits["monthly_decisions"]:
            raise HTTPException(

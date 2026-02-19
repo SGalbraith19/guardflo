@@ -9,12 +9,12 @@ from tenancy.models import FinancialDecision
 # Set from environment variable in production
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "sk_test_yourkey")
 
-def get_monthly_usage(org_name):
+def get_monthly_usage(org_id):
    db = SessionLocal()
    try:
        start = datetime.utcnow().replace(day=1)
        count = db.query(func.count(FinancialDecision.id)).filter(
-           FinancialDecision.organisation == org_name,
+           FinancialDecision.organisation_id == org_id,
            FinancialDecision.created_at >= start
        ).scalar()
        return count
