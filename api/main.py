@@ -113,7 +113,7 @@ def financial_decision(
    # 3️⃣ Lock policy version
    policy = (
        db.query(PolicyRegistry)
-       .filter(PolicyRegistry.version == request.policy_version)
+       .filter(PolicyRegistry.version == str(request.policy_version))
        .first()
    )
 
