@@ -5,6 +5,7 @@ from datetime import datetime
 
 class FinancialDecisionRequest(BaseModel):
    tenant_id: str = Field(..., description="Tenant making the request")
+   policy_version: int
    amount: float = Field(..., gt=0)
    currency: str = Field(..., min_length=3, max_length=3)
    vendor_id: str
