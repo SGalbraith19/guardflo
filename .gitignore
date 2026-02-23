@@ -1,5 +1,12 @@
-.env
-tenancy.db
-*.db
 venv/
 __pycache__/
+*.pyc
+*.db
+*.sqlite
+.DS_Store
+.env
+.env.local
+.vscode/
+.pytest_cache/
+logs/
+node_modules/
