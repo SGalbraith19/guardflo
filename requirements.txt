@@ -51,3 +51,4 @@ wrapt==2.1.1
 psycopg2-binary
 neo4j
 prometheus-client
+jinja2
