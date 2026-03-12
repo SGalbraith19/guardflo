@@ -552,9 +552,9 @@ def validate_ledger(tenant_id: str, db: Session = Depends(get_db)):
 # =========================================
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+async def homepage(request: Request):
    return templates.TemplateResponse(
-       "platform.html",
+       "base.html",
        {"request": request}
    )
 
