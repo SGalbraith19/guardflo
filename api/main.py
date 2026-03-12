@@ -7,7 +7,6 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI, Depends, HTTPException, Header, Request
-from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -68,7 +67,7 @@ app = FastAPI(title="GuardFlo Financial Enforcement Gate")
 # ------------------------------------------------
 # STRIPE + ROUTERS
 # ------------------------------------------------
-app.add_middleware(ProxyHeadersMiddleware)
+
 app.include_router(stripe_router)
 app.include_router(replay_router)
 
