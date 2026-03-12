@@ -1,0 +1,8 @@
+{
+"rules":[
+ {"type":"amount_limit","max":5000},
+ {"type":"risk_limit","threshold":80},
+ {"type":"block_category","value":"gambling"},
+ {"type":"graph_risk","threshold":5}
+]
+}

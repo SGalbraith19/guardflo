@@ -2,9 +2,9 @@ from typing import Dict, Any, Optional
 from dataclasses import dataclass
 
 
-# ============================================================
-# TIER LIMITS & CAPABILITIES
-# ============================================================
+# =========================================================
+# TIER LIMITS
+# =========================================================
 
 TIER_LIMITS: Dict[str, Dict[str, Optional[int]]] = {
    "starter": {
@@ -21,6 +21,10 @@ TIER_LIMITS: Dict[str, Dict[str, Optional[int]]] = {
    },
 }
 
+
+# =========================================================
+# TIER CAPABILITIES
+# =========================================================
 
 TIER_CAPABILITIES: Dict[str, Dict[str, bool]] = {
    "starter": {
@@ -41,9 +45,9 @@ TIER_CAPABILITIES: Dict[str, Dict[str, bool]] = {
 }
 
 
-# ============================================================
+# =========================================================
 # PRICING MODEL
-# ============================================================
+# =========================================================
 
 @dataclass
 class PricingInput:
@@ -55,7 +59,7 @@ class PricingInput:
    custom_clauses: bool = False
 
 
-BASE_PRICING = {
+BASE_PRICING: Dict[str, int] = {
    "small": 10000,
    "medium": 25000,
    "large": 50000,
@@ -63,11 +67,13 @@ BASE_PRICING = {
 
 
 def calculate_pricing(input: PricingInput) -> Dict[str, Any]:
+
    if input.organisation_size not in BASE_PRICING:
-       raise ValueError("Invalid organisation size")
+       raise ValueError(f"Invalid organisation size: {input.organisation_size}")
 
    base = BASE_PRICING[input.organisation_size]
-   total = base
+   total = float(base)
+
    multipliers = []
 
    if input.production:
@@ -90,7 +96,7 @@ def calculate_pricing(input: PricingInput) -> Dict[str, Any]:
        total *= 1.10
        multipliers.append("Custom Clauses +10%")
 
-   total = round(total, -2)
+   total = int(round(total, -2))
 
    return {
        "base_price": base,
@@ -99,22 +105,49 @@ def calculate_pricing(input: PricingInput) -> Dict[str, Any]:
    }
 
 
-# ============================================================
+# =========================================================
 # ENFORCEMENT HELPERS
-# ============================================================
+# =========================================================
 
 def get_tier_limits(tier: str) -> Dict[str, Optional[int]]:
+   """
+   Safely retrieve limits for a tier.
+   """
    if tier not in TIER_LIMITS:
        raise ValueError(f"Invalid tier: {tier}")
    return TIER_LIMITS[tier]
 
 
 def get_tier_capabilities(tier: str) -> Dict[str, bool]:
+   """
+   Return feature capabilities for a tier.
+   """
    if tier not in TIER_CAPABILITIES:
        raise ValueError(f"Invalid tier: {tier}")
    return TIER_CAPABILITIES[tier]
 
 
 def tier_allows_feature(tier: str, feature: str) -> bool:
+   """
+   Check whether a tier allows a specific feature.
+   """
    capabilities = get_tier_capabilities(tier)
    return capabilities.get(feature, False)
+
+
+def get_monthly_decision_limit(tier: str) -> Optional[int]:
+   """
+   Return monthly decision quota.
+   None = unlimited
+   """
+   limits = get_tier_limits(tier)
+   return limits.get("monthly_decisions")
+
+
+def get_rate_limit_per_minute(tier: str) -> int:
+   """
+   Return API rate limit for tier.
+   """
+   limits = get_tier_limits(tier)
+   rate = limits.get("rate_limit_per_minute")
+   return rate if rate is not None else 0

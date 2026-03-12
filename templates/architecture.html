@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="architecture-hero hero">
+
+<div class="container">
+
+<h1>GuardFlo Architecture</h1>
+
+<p>
+GuardFlo acts as a deterministic enforcement layer between automated financial
+systems and financial infrastructure. Every transaction decision is evaluated,
+signed, and permanently recorded before execution.
+</p>
+
+</div>
+
+</section>
+
+
+
+<div class="architecture-flow">
+
+<div class="arch-node">Client Systems</div>
+
+<div class="arch-line"></div>
+
+<div class="arch-node">GuardFlo API</div>
+
+<div class="arch-line"></div>
+
+<div class="arch-node">Policy Engine</div>
+
+<div class="arch-line"></div>
+
+<div class="arch-node">Decision Signing</div>
+
+<div class="arch-line"></div>
+
+<div class="arch-node">Immutable Ledger</div>
+
+<div class="arch-line"></div>
+
+<div class="arch-node">Financial Infrastructure</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<section class="architecture-pipeline">
+
+<div class="container">
+
+<h2>Decision Processing Pipeline</h2>
+
+<div class="pipeline-grid">
+
+<div class="pipeline-card">
+
+<h3>Request Ingestion</h3>
+
+<p>
+Financial transaction requests enter GuardFlo through the API.
+Each request contains the financial context and policy scope.
+</p>
+
+</div>
+
+
+<div class="pipeline-card">
+
+<h3>Authentication</h3>
+
+<p>
+Requests are authenticated using tenant scoped API keys.
+Each tenant operates in an isolated enforcement context.
+</p>
+
+</div>
+
+
+<div class="pipeline-card">
+
+<h3>Policy Evaluation</h3>
+
+<p>
+The deterministic policy engine evaluates transaction rules,
+limits, and enforcement conditions.
+</p>
+
+</div>
+
+
+<div class="pipeline-card">
+
+<h3>Decision Signing</h3>
+
+<p>
+Every enforcement outcome is cryptographically signed to
+guarantee integrity and authenticity.
+</p>
+
+</div>
+
+
+<div class="pipeline-card">
+
+<h3>Ledger Recording</h3>
+
+<p>
+Decisions are recorded in an append-only ledger with
+cryptographic hash chaining.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<section class="ledger-architecture">
+
+<div class="container">
+
+<h2>Immutable Decision Ledger</h2>
+
+<p>
+GuardFlo maintains an append-only decision ledger designed to
+create a verifiable record of financial enforcement actions.
+</p>
+
+<ul>
+
+<li>Append-only event storage</li>
+
+<li>Cryptographic hash chaining</li>
+
+<li>Signed enforcement outcomes</li>
+
+<li>Tenant isolated decision records</li>
+
+<li>Auditable financial policy history</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+
+<section class="deployment-model">
+
+<div class="container">
+
+<h2>Deployment Model</h2>
+
+<div class="deployment-grid">
+
+<div class="deployment-card">
+
+<h3>GuardFlo Cloud</h3>
+
+<p>
+Fully managed infrastructure hosted by GuardFlo.
+Ideal for rapid deployment.
+</p>
+
+</div>
+
+
+<div class="deployment-card">
+
+<h3>Private Infrastructure</h3>
+
+<p>
+Enterprise customers can deploy GuardFlo within their own VPC
+for maximum control and security.
+</p>
+
+</div>
+
+
+<div class="deployment-card">
+
+<h3>Hybrid Enforcement</h3>
+
+<p>
+Combine local policy enforcement with GuardFlo ledger services
+for hybrid architectures.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<section class="architecture-cta">
+
+<div class="container">
+
+<h2>Build Deterministic Financial Infrastructure</h2>
+
+<p>
+GuardFlo ensures automated financial systems behave predictably,
+securely, and with complete auditability.
+</p>
+
+<a class="cta-button" href="/signup">
+Get API Access
+</a>
+
+</div>
+
+</section>
+
+{% endblock %}

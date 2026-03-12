@@ -2,6 +2,9 @@ import os
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
 from tenancy.models import Organisation
 from tenancy.repository import SessionLocal
 
@@ -10,7 +13,7 @@ from tenancy.repository import SessionLocal
 # Deployment Mode
 # ============================================================
 
-DEPLOYMENT_MODE = os.getenv("GUARDFLO_MODE", "multi")  # multi | dedicated
+DEPLOYMENT_MODE = os.getenv("GUARDFLO_MODE", "multi")  # "multi" | "dedicated"
 
 
 # ============================================================
@@ -28,15 +31,18 @@ class PricingInput:
 
 
 BASE_PRICING = {
-   "small": 10000,
-   "medium": 25000,
-   "large": 50000,
+   "small": 10_000,
+   "medium": 25_000,
+   "large": 50_000,
 }
 
 
 def calculate_pricing(input: PricingInput) -> Dict[str, Any]:
    if input.organisation_size not in BASE_PRICING:
-       raise ValueError("Invalid organisation size")
+       raise HTTPException(
+           status_code=400,
+           detail="Invalid organisation size"
+       )
 
    base = BASE_PRICING[input.organisation_size]
    total = base
@@ -62,7 +68,7 @@ def calculate_pricing(input: PricingInput) -> Dict[str, Any]:
        total *= 1.10
        multipliers.append("Custom Clauses +10%")
 
-   total = round(total, -2)  # round to nearest 100
+   total = round(total, -2)
 
    return {
        "base_price": base,
@@ -75,12 +81,26 @@ def calculate_pricing(input: PricingInput) -> Dict[str, Any]:
 # Organisation Resolution
 # ============================================================
 
-def resolve_organisation(api_key: str) -> Optional[Organisation]:
+def resolve_organisation(api_key: str, db: Session):
+   
+   if not api_key:
+       return None
+   
+   organisation = (
+       db.query(Organisation)
+       .filter(Organisation.api_key == api_key)
+       .first()
+   )
+
+   return organisation
    """
    Resolves organisation from API key.
-   Handles dedicated vs multi-tenant mode.
+   Raises proper HTTPException instead of returning None.
    """
 
+   # -------------------------
+   # Dedicated Mode
+   # -------------------------
    if DEPLOYMENT_MODE == "dedicated":
        return Organisation(
            id=os.getenv("GUARDFLO_ID", "org_dedicated"),
@@ -88,10 +108,13 @@ def resolve_organisation(api_key: str) -> Optional[Organisation]:
            tier=os.getenv("GUARDFLO_ORG_TIER", "enterprise"),
            api_key="dedicated",
            active=True,
-           subscription_active=True,
        )
 
-   db = SessionLocal()
+   # -------------------------
+   # Multi-Tenant Mode
+   # -------------------------
+   db: Session = SessionLocal()
+
    try:
        org = (
            db.query(Organisation)
@@ -100,13 +123,16 @@ def resolve_organisation(api_key: str) -> Optional[Organisation]:
        )
 
        if not org:
-           return None
+           raise HTTPException(
+               status_code=404,
+               detail="Organisation not found"
+           )
 
        if not org.active:
-           return None
-
-       if not org.subscription_active:
-           return None
+           raise HTTPException(
+               status_code=403,
+               detail="Organisation inactive"
+           )
 
        return org
 

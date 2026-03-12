@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero small">
+<div class="container">
+<h1>Pricing</h1>
+<p>Deterministic enforcement infrastructure for automated financial systems.</p>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+
+<div class="pricing-grid">
+
+<!-- STARTER -->
+<div class="pricing-card">
+
+<h3>Starter</h3>
+
+<div class="price">$29<span>/month</span></div>
+
+<ul class="features">
+<li>10,000 decisions / month</li>
+<li>Shared infrastructure</li>
+<li>Standard SLA</li>
+</ul>
+
+<form action="/stripe/create-checkout-session" method="post">
+<input type="hidden" name="plan" value="starter">
+<input type="hidden" name="company_name" value="Demo Company">
+<input type="hidden" name="customer_email" value="demo@company.com">
+
+<!-- FIX -->
+<input type="hidden" name="price_id" value="price_1T5gQsBjtjn8xWYF4Kgp2Irk">
+
+<button class="btn-secondary pricing-btn">
+Select
+</button>
+</form>
+
+</div>
+
+
+<!-- PRO -->
+<div class="pricing-card featured">
+
+<h3>Pro</h3>
+
+<div class="price">$300<span>/month</span></div>
+
+<ul class="features">
+<li>100,000 decisions / month</li>
+<li>Priority support</li>
+<li>Webhook sync</li>
+</ul>
+
+<form action="/stripe/create-checkout-session" method="post">
+<input type="hidden" name="plan" value="pro">
+<input type="hidden" name="company_name" value="Demo Company">
+<input type="hidden" name="customer_email" value="demo@company.com">
+
+<!-- FIX -->
+<input type="hidden" name="price_id" value="price_1T5gRIBjtjn8xWYF8I33iEe">
+
+<button class="btn-primary pricing-btn">
+Select
+</button>
+</form>
+
+</div>
+
+
+<!-- ENTERPRISE -->
+<div class="pricing-card">
+
+<h3>Enterprise</h3>
+
+<div class="price">$800<span>/month</span></div>
+
+<ul class="features">
+<li>Dedicated infrastructure</li>
+<li>SLA guarantees</li>
+<li>Advanced compliance tooling</li>
+</ul>
+
+<form action="/stripe/create-checkout-session" method="post">
+<input type="hidden" name="plan" value="enterprise">
+<input type="hidden" name="company_name" value="Demo Company">
+<input type="hidden" name="customer_email" value="demo@company.com">
+
+<!-- FIX -->
+<input type="hidden" name="price_id" value="price_1T5gRjBjtjn8xWYFuuPsx3h5">
+
+<button class="btn-secondary pricing-btn">
+Select
+</button>
+</form>
+
+</div>
+
+</div>
+
+</div>
+</section>
+
+{% endblock %}

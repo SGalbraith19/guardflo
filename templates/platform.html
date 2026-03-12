@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero">
+
+<div class="hero-particles"></div>
+
+<div class="hero-content">
+
+<div class="container hero-grid">
+
+<div class="hero-text">
+
+<p class="hero-eyebrow">
+GUARDFLO PLATFORM
+</p>
+
+<h1>
+Deterministic <span class="gradient-text">financial infrastructure</span>
+<br>
+Built for automated systems.
+</h1>
+
+<p class="hero-sub">
+GuardFlo enforces financial policy at the infrastructure layer —
+ensuring transactions, ledgers, and decisions follow deterministic rules.
+</p>
+
+<div class="hero-actions">
+<a href="/docs" class="btn-primary">Start Building</a>
+<a href="/platform" class="btn-secondary">Explore Platform</a>
+</div>
+
+</div>
+<div class="hero-diagram">
+
+<div class="diagram">
+
+<div class="diagram-box">
+Application
+</div>
+
+<div class="diagram-arrow">
+  <span class="data-flow"></span>
+  </div>
+
+<div class="diagram-box highlight">
+GuardFlo Decision Engine
+</div>
+
+<div class="diagram-arrow">
+  <span class="data-flow"></span>
+</div>
+
+<div class="diagram-box">
+Policy Enforcement
+</div>
+
+<div class="diagram-arrow">
+  <span class="data-flow"></span>
+</div>
+
+<div class="diagram-box">
+Secure Financial Ledger
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section class="trusted">
+ <div class="container">
+
+   <p class="trusted-label">Designed for financial infrastructure teams</p>
+
+   <div class="trusted-logos">
+
+     <div class="company-logo">Stripe</div>
+     <div class="company-logo">Plaid</div>
+     <div class="company-logo">Ramp</div>
+     <div class="company-logo">Mercury</div>
+     <div class="company-logo">Brex</div>
+
+   </div>
+
+ </div>
+</section>
+
+<section class="workflow">
+ <div class="container">
+
+   <h2 class="section-title">How GuardFlo Works</h2>
+
+   <div class="workflow-grid">
+
+<div class="workflow-step">
+<span class="step-number">01</span>
+<h3>Transaction Request</h3>
+<p>Your workflow sends a financial decision request to GuardFlo.</p>
+</div>
+
+<div class="workflow-step">
+<span class="step-number">02</span>
+<h3>Policy Evaluation</h3>
+<p>GuardFlo evaluates quotas, policies, and usage limits.</p>
+</div>
+
+<div class="workflow-step">
+<span class="step-number">03</span>
+<h3>Signed Decision</h3>
+<p>A deterministic allow or deny response is returned instantly.</p>
+</div>
+
+<div class="workflow-step">
+<span class="step-number">04</span>
+<h3>Execution</h3>
+<p>Your automation proceeds — or stops safely.</p>
+</div>
+
+</div>
+
+   </div>
+ </div>
+</section>
+
+<section class="api-example">
+<div class="container">
+
+<h2>Make a financial decision</h2>
+<p class="section-subtitle">
+One API call enforces financial policy for automated systems.
+</p>
+
+<div class="api-grid">
+
+<div>
+
+<div class="code-label">Request</div>
+
+<pre class="code-block"><code>
+import requests
+
+response = requests.post(
+"https://api.guardflo.com/api/v1/decide",
+headers={"Authorization":"Bearer YOUR_API_KEY"},
+json={
+"transaction_id":"txn_123",
+"amount":5000,
+"currency":"USD",
+"merchant":"Stripe",
+"nonce":"abc123"
+})
+
+print(response.json())
+</code></pre>
+
+</div>
+
+<div>
+
+<div class="code-label">Response</div>
+
+<pre class="code-block response"><code>
+{
+"decision":"allow",
+"risk_score":0.12,
+"decision_id":"dec_8923",
+"signature":"..."
+}
+</code></pre>
+
+</div>
+
+</div>
+</div>
+</section>
+
+<section class="features">
+ <div class="container">
+
+   <h2>Deterministic financial enforcement</h2>
+
+   <div class="feature-grid">
+
+     <div class="feature-card">
+       <h3>Deterministic Decisions</h3>
+       <p>
+       GuardFlo evaluates financial transactions against strict policy rules.
+       No AI. No probabilistic models. Every decision is reproducible.
+       </p>
+     </div>
+
+     <div class="feature-card">
+       <h3>Tamper-Evident Ledger</h3>
+       <p>
+       Every decision is stored in a cryptographic append-only ledger with
+       hash chaining and digital signatures.
+       </p>
+     </div>
+
+     <div class="feature-card">
+       <h3>Automation Safety</h3>
+       <p>
+       Prevent automated systems from executing financial actions that violate
+       policy or exceed limits.
+       </p>
+     </div>
+
+   </div>
+
+ </div>
+</section>
+
+<section class="callout">
+ <div class="container">
+
+   <h2>Prevent Financial Automation Failures</h2>
+
+   <p>
+     Duplicate payouts, policy violations, and automation errors are common in distributed
+     financial workflows. GuardFlo acts as a deterministic enforcement layer before
+     financial actions execute.
+   </p>
+
+   <a href="/docs" class="btn-primary">Start Building</a>
+
+ </div>
+</section>
+
+{% endblock %}

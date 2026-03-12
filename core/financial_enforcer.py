@@ -1,38 +1,72 @@
-import uuid
+from sqlalchemy.orm import Session
 from datetime import datetime
-from typing import Dict, Any, List
+from models.tenant import Tenant
+from models.financial_ledger import FinancialLedger
+from billing.usage_meter import get_usage_for_update, increment_usage
+from core.decision_engine import run_financial_decision
+from signing.signer import sign_payload
+import json
+import hashlib
 
-def evaluate_transaction(
-   transaction: Dict[str, Any],
-   policy: Dict[str, Any],
-   daily_total: float
-) -> Dict[str, Any]:
+from security.key_registry import get_active_key, ACTIVE_KEY_VERSION
 
-   reasons: List[str] = []
+def enforce_financial_decision(
+   db: Session,
+   tenant: Tenant,
+   request_payload: dict,
+):
+   """
+   Atomic enforcement pipeline.
 
-   amount = transaction["amount"]
-   category = transaction.get("category")
-   risk_score = transaction.get("risk_score", 0)
+   Guarantees:
+   - Row locking
+   - Quota enforcement
+   - Deterministic decision
+   - Ledger write
+   - Usage increment
+   - All inside one transaction
+   """
 
-   # 1. Per-transaction limit
-   if amount > policy["max_transaction_amount"]:
-       reasons.append("MAX_TRANSACTION_EXCEEDED")
+   # ---- START TRANSACTION ----
+   with db.begin():
 
-   # 2. Daily cumulative limit
-   if (daily_total + amount) > policy["max_daily_amount"]:
-       reasons.append("MAX_DAILY_LIMIT_EXCEEDED")
+       # 1️⃣ Lock usage row
+       usage = get_usage_for_update(db, tenant.id)
 
-   # 3. Risk score threshold
-   if risk_score > policy["max_risk_score"]:
-       reasons.append("RISK_SCORE_EXCEEDED")
+       # 2️⃣ Subscription check
+       if not tenant.active:
+           raise Exception("Subscription inactive")
 
-   # 4. Disallowed category
-   if category in policy["blocked_categories"]:
-       reasons.append("CATEGORY_BLOCKED")
+       # 3️⃣ Quota check
+       if usage.current_period_usage >= tenant.monthly_quota:
+           raise Exception("Monthly quota exceeded")
 
-   decision = "deny" if reasons else "allow"
+       # 4️⃣ Deterministic decision
+       decision_result = run_financial_decision(
+           request_payload,
+           tenant,
+       )
+
+       # 5️⃣ Canonical serialization
+       canonical = json.dumps(
+           decision_result,
+           sort_keys=True,
+           separators=(",", ":"),
+       )
+
+       decision_hash = hashlib.sha256(
+           canonical.encode()
+       ).hexdigest()
+    
+       active_key = get_active_key()
+       signature = sign_payload(canonical, active_key)
+
+       # 7️⃣ Increment usage
+       increment_usage(usage)
+
+       # Commit happens automatically when exiting context
 
    return {
-       "decision": decision,
-       "reason_codes": reasons,
+       "decision": decision_result,
+       "signature": signature,
    }

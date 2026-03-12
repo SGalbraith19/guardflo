@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>GuardFlo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+
+</head>
+
+<body>
+
+<header class="site-header">
+
+<div class="nav-container">
+
+<div class="nav-left">
+<a href="/" class="logo">
+<img src="{{ url_for('static', path='img/logos.png') }}" class="logo-img" alt="GuardFlo">
+</a>
+</div>
+
+<nav class="nav-links">
+<a href="/platform">Platform</a>
+<a href="/architecture">Architecture</a>
+<a href="/security">Security</a>
+<a href="/pricing">Pricing</a>
+<a href="/enterprise">Enterprise</a>
+<a href="/docs">Docs</a>
+</nav>
+
+<div class="nav-actions">
+<a href="/login" class="nav-login">Sign In</a>
+<a href="/pricing" class="nav-cta">Get API Access</a>
+</div>
+
+</div>
+
+</header>
+
+
+<main>
+
+{% block content %}
+
+{% endblock %}
+
+</main>
+
+
+<footer class="footer">
+
+<div class="container">
+
+<div class="footer-grid">
+
+<div>
+<h4>GuardFlo</h4>
+<p>Deterministic financial enforcement infrastructure.</p>
+</div>
+
+<div>
+<h5>Product</h5>
+<a href="/platform">Platform</a>
+<a href="/security">Security</a>
+<a href="/pricing">Pricing</a>
+</div>
+
+<div>
+<h5>Developers</h5>
+<a href="/docs">Docs</a>
+<a href="/api">API</a>
+<a href="/status">Status</a>
+</div>
+
+</div>
+
+<p class="copyright">
+© 2026 GuardFlo
+</p>
+
+</div>
+
+</footer>
+
+</body>
+
+</html>

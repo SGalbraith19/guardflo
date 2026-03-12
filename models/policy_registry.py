@@ -12,3 +12,5 @@ class PolicyRegistry(Base):
    version = Column(String, primary_key=True)
    policy_hash = Column(String, nullable=False)
    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+   rules = Column(JSON, nullable=False)

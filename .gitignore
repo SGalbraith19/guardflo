@@ -1,12 +1,18 @@
+# Environment
+.env
+.env.*
+
+# Virtual env
 venv/
 __pycache__/
 *.pyc
-*.db
-*.sqlite
-.DS_Store
-.env
-.env.local
-.vscode/
-.pytest_cache/
+
+# Keys
+*.pem
+
+# Logs
 logs/
-node_modules/
+*.log
+
+# Mac
+.DS_Store

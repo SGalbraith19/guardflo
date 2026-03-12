@@ -1,7 +1,8 @@
 {
  "python.envFile": "${workspaceFolder}/.env",
  "python.analysis.extraPaths": [
-   "./"
+  "./",
+  "./init_"
 ],
 "python-envs.pythonProjects": []
 }

@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="section">
+<div class="container security-container">
+
+<!-- Page Intro -->
+
+<div class="security-section">
+
+<h2>Security Architecture</h2>
+
+<p>
+GuardFlo is designed as deterministic financial enforcement infrastructure.
+Every decision, transaction evaluation, and policy enforcement event is
+executed deterministically and recorded in a tamper-evident ledger.
+</p>
+
+<p>
+The platform protects automated financial workflows from duplicate execution,
+policy violations, replay attacks, and decision tampering.
+</p>
+
+<p>
+By enforcing financial rules at the infrastructure layer, GuardFlo ensures that
+automated payment systems behave predictably and verifiably under all
+conditions.
+</p>
+
+</div>
+
+
+<div class="security-divider"></div>
+
+
+<!-- Why GuardFlo Exists -->
+
+<div class="security-section">
+
+<h3>Why GuardFlo Exists</h3>
+
+<p>
+Modern financial systems increasingly rely on automated workflows to move money
+between services, partners, and customers.
+</p>
+
+<p>
+These workflows introduce new operational risks:
+</p>
+
+<ul class="security-list">
+<li>Duplicate transaction execution</li>
+<li>Retry storms from failing services</li>
+<li>Race conditions in distributed systems</li>
+<li>Policy violations in automated decision pipelines</li>
+</ul>
+
+<p>
+GuardFlo provides a deterministic enforcement layer that ensures financial
+rules are evaluated consistently before money moves.
+</p>
+
+</div>
+
+
+<div class="security-divider"></div>
+
+
+<!-- Core Principles -->
+
+<div class="security-section">
+
+<h3>Core Security Principles</h3>
+
+<div class="security-principles">
+
+<div>
+<strong>Deterministic Enforcement</strong><br>
+GuardFlo evaluates transaction requests using deterministic policy logic.
+Enforcement outcomes are reproducible and do not rely on probabilistic models
+or AI decision layers.
+</div>
+
+<div>
+<strong>Cryptographic Integrity</strong><br>
+Each decision response is cryptographically signed, allowing downstream systems
+to verify the authenticity and integrity of enforcement outcomes.
+</div>
+
+<div>
+<strong>Immutable Decision Ledger</strong><br>
+All enforcement decisions are recorded in an append-only ledger using
+cryptographic hash chaining, creating a tamper-evident audit trail.
+</div>
+
+<div>
+<strong>Tenant Isolation</strong><br>
+Every API key operates within an isolated tenant context. Decision evaluation,
+policy rules, and ledger records remain scoped to the owning tenant.
+</div>
+
+<div>
+<strong>Idempotent Request Handling</strong><br>
+GuardFlo enforces idempotency to prevent duplicate financial operations caused
+by retries, network failures, or webhook replays.
+</div>
+
+</div>
+
+</div>
+
+
+<div class="security-divider"></div>
+
+
+<!-- Architecture -->
+
+<div class="security-section">
+
+<h3>Decision Security Architecture</h3>
+
+<p>
+Every enforcement decision passes through a deterministic pipeline.
+Requests are authenticated, evaluated against policy, and permanently recorded
+before downstream financial systems execute transactions.
+</p>
+
+<div class="architecture-diagram">
+
+   <div class="security-flow">
+
+       <div class="security-node">Client Request</div>
+       <div class="security-arrow">→</div>
+
+       <div class="security-node">API Authentication</div>
+       <div class="security-arrow">→</div>
+
+       <div class="security-node">Policy Evaluation Engine</div>
+       <div class="security-arrow">→</div>
+
+       <div class="security-node">Signed Decision</div>
+
+   </div>
+
+   <div class="ledger-node">
+       Append-Only Ledger
+   </div>
+
+</div>
+
+
+<div class="security-divider"></div>
+
+
+<!-- Operational Security -->
+
+<div class="security-section">
+
+<h3>Operational Security</h3>
+
+<div class="security-card">
+
+<ul>
+
+<li>
+<strong>Encryption</strong><br>
+All API communication occurs over TLS 1.2+ and sensitive data is encrypted at rest.
+</li>
+
+<li>
+<strong>API Key Security</strong><br>
+API keys are tenant-scoped and can be rotated without service interruption.
+</li>
+
+<li>
+<strong>Request Integrity</strong><br>
+Idempotency keys prevent duplicate financial operations caused by network retries
+or client errors.
+</li>
+
+<li>
+<strong>Auditability</strong><br>
+Every enforcement decision is permanently recorded and traceable through the
+append-only ledger.
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+
+<div class="security-divider"></div>
+
+
+<!-- Threat Model -->
+
+<div class="security-section">
+
+<h3>Threat Model</h3>
+
+<div class="security-card">
+
+<ul>
+
+<li>
+<strong>Duplicate transaction execution</strong> caused by retries or workflow errors
+</li>
+
+<li>
+<strong>Policy violations</strong> within automated payment pipelines
+</li>
+
+<li>
+<strong>Replay attacks</strong> attempting to repeat previously valid requests
+</li>
+
+<li>
+<strong>Decision tampering</strong> targeting enforcement outcomes or ledger records
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+
+<div class="security-divider"></div>
+
+
+<!-- Compliance -->
+
+<div class="security-section">
+
+<h3>Compliance Roadmap</h3>
+
+<div class="security-card">
+
+<p>
+GuardFlo is built using infrastructure-grade security practices and is working
+toward industry standard compliance frameworks.
+</p>
+
+<ul>
+
+<li>SOC 2 Type I certification</li>
+<li>SOC 2 Type II certification</li>
+<li>Independent third-party security audits</li>
+<li>Continuous security monitoring and infrastructure hardening</li>
+
+</ul>
+
+</div>
+
+</div>
+
+
+</div>
+</section>
+
+{% endblock %}
