@@ -220,7 +220,7 @@ def create_portal_session(customer_id: str):
 
 @router.get("/", response_class=HTMLResponse)
 async def landing(request: Request):
-   return templates.TemplateResponse("landing.html", {"request": request})
+   return templates.TemplateResponse("platform.html", {"request": request})
 
 @router.get("/pricing", response_class=HTMLResponse)
 async def pricing(request: Request):
