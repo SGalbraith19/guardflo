@@ -1,5 +1,6 @@
 import os
 import secrets
+import uuid
 from click.globals import pop_context
 import stripe
 
@@ -67,7 +68,7 @@ async def create_checkout_session(
                "company_name": company_name,
                "plan": plan,
            },
-           success_url="http://127.0.0.1:8000/success",
+           success_url="http://127.0.0.1:8000/success?session_id={CHECKOUT_SESSION_ID}",
            cancel_url="http://127.0.0.1:8000/pricing",
        )
 
@@ -121,8 +122,6 @@ async def stripe_webhook(request: Request):
            # Generate API key
            
            raw_api_key = "sk_live_" + secrets.token_hex(24)
-           print("NEW API KEY:", raw_api_key)
-
            hashed_key = pop_context.hash(raw_api_key)
 
            # Create Organisation
@@ -134,6 +133,8 @@ async def stripe_webhook(request: Request):
                stripe_customer_id=customer_id,
                api_key=hashed_key,
                quota_limit=TIER_LIMITS.get(plan, 1000),
+
+               first_api_key=raw_api_key
            )
 
            db.add(org)
@@ -200,13 +201,35 @@ async def stripe_webhook(request: Request):
 
 @router.get("/success")
 async def checkout_success(request: Request, session_id: str):
+
    session = stripe.checkout.Session.retrieve(session_id)
+
+   email = session.get("customer_email")
+
+   db = SessionLocal()
+
+   org = db.query(Organisation).filter(
+       Organisation.stripe_customer_id == session.get("customer")
+   ).first()
+
+   api_key = None
+   tenant_id = None
+
+   if org:
+       api_key = org.first_api_key
+       tenant_id = org.id
+
+       # Clear the raw key so it cannot be retrieved again
+       org.first_api_key = None
+       db.commit()
 
    return templates.TemplateResponse(
        "success.html",
        {
            "request": request,
-           "email": session.get("customer_email")
+           "email": email,
+           "api_key": api_key,
+           "tenant_id": tenant_id
        }
    )
 

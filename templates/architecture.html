@@ -9,9 +9,11 @@
 <h1>GuardFlo Architecture</h1>
 
 <p>
-GuardFlo acts as a deterministic enforcement layer between automated financial
-systems and financial infrastructure. Every transaction decision is evaluated,
-signed, and permanently recorded before execution.
+GuardFlo is a deterministic enforcement layer for automated financial
+systems. 
+
+it evaluates transactions against policy rules, prevents replay attacks, 
+tracks usage quotas, and records every decision in a cryptographic ledger.
 </p>
 
 </div>
@@ -22,7 +24,7 @@ signed, and permanently recorded before execution.
 
 <div class="architecture-flow">
 
-<div class="arch-node">Client Systems</div>
+<div class="arch-node">Client Request</div>
 
 <div class="arch-line"></div>
 
@@ -30,19 +32,27 @@ signed, and permanently recorded before execution.
 
 <div class="arch-line"></div>
 
-<div class="arch-node">Policy Engine</div>
+<div class="arch-node">Policy Registry</div>
 
 <div class="arch-line"></div>
 
-<div class="arch-node">Decision Signing</div>
+<div class="arch-node">Deterministic Policy VM</div>
 
 <div class="arch-line"></div>
 
-<div class="arch-node">Immutable Ledger</div>
+<div class="arch-node">Decision Payload</div>
 
 <div class="arch-line"></div>
 
-<div class="arch-node">Financial Infrastructure</div>
+<div class="arch-node">Cryptographic Signature</div>
+
+<div class="arch-line"></div>
+
+<div class="arch-node">Hashed-Chained Ledger</div>
+
+<div class="arch-line"></div>
+
+<div class="arch-node">API Response</div>
 
 </div>
 
@@ -56,7 +66,7 @@ signed, and permanently recorded before execution.
 
 <div class="container">
 
-<h2>Decision Processing Pipeline</h2>
+<h2>Deterministic Decision Payload</h2>
 
 <div class="pipeline-grid">
 
@@ -65,8 +75,9 @@ signed, and permanently recorded before execution.
 <h3>Request Ingestion</h3>
 
 <p>
-Financial transaction requests enter GuardFlo through the API.
-Each request contains the financial context and policy scope.
+Financial decision requests enter GuardFlo through the API.
+Each request contains transaction context, tenant identity, 
+and policy scope used for enforcement.
 </p>
 
 </div>
@@ -77,8 +88,9 @@ Each request contains the financial context and policy scope.
 <h3>Authentication</h3>
 
 <p>
-Requests are authenticated using tenant scoped API keys.
-Each tenant operates in an isolated enforcement context.
+Requests are authenticated using tenant-scoped API keys.
+Each tenant operates in an isolated enforcement context,
+ensuring policies and quotas remain strictly separated.
 </p>
 
 </div>
@@ -89,8 +101,9 @@ Each tenant operates in an isolated enforcement context.
 <h3>Policy Evaluation</h3>
 
 <p>
-The deterministic policy engine evaluates transaction rules,
-limits, and enforcement conditions.
+The deterministic policy engine evaluates transaction rules, usage
+quotas, replay protection, and enforcement conditions before any
+financial action can execute.
 </p>
 
 </div>
@@ -102,7 +115,8 @@ limits, and enforcement conditions.
 
 <p>
 Every enforcement outcome is cryptographically signed to
-guarantee integrity and authenticity.
+ensure integrity, authenticity, and non-repudiation of the
+decision.
 </p>
 
 </div>
@@ -114,7 +128,8 @@ guarantee integrity and authenticity.
 
 <p>
 Decisions are recorded in an append-only ledger with
-cryptographic hash chaining.
+cryptographic hash chaining, producing a tamper-evident audit
+trail of all enforcement actions. 
 </p>
 
 </div>
@@ -135,7 +150,7 @@ cryptographic hash chaining.
 
 <p>
 GuardFlo maintains an append-only decision ledger designed to
-create a verifiable record of financial enforcement actions.
+create a verifiable record of every financial enforcement action.
 </p>
 
 <ul>
@@ -144,9 +159,9 @@ create a verifiable record of financial enforcement actions.
 
 <li>Cryptographic hash chaining</li>
 
-<li>Signed enforcement outcomes</li>
+<li>Digitally signed enforcement decisions</li>
 
-<li>Tenant isolated decision records</li>
+<li>Tenant-isolated decision records</li>
 
 <li>Auditable financial policy history</li>
 
@@ -220,7 +235,7 @@ GuardFlo ensures automated financial systems behave predictably,
 securely, and with complete auditability.
 </p>
 
-<a class="cta-button" href="/signup">
+<a class="cta-button" href="/pricing">
 Get API Access
 </a>
 

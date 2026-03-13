@@ -1795,3 +1795,22 @@ background:#cbd5e1;
 
 transform:translateX(-50%);
 }
+
+.api-key-row {
+   display: flex;
+   gap: 12px;
+   align-items: center;
+}
+
+.copy-btn {
+   background: #2563eb;
+   color: white;
+   border: none;
+   padding: 6px 12px;
+   border-radius: 6px;
+   cursor: pointer;
+}
+
+.copy-btn:hover {
+   background: #1d4ed8;
+}

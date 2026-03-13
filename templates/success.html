@@ -2,20 +2,55 @@
 {% block content %}
 
 <section class="hero small">
- <div class="container">
+<div class="container">
 
-   <h1>Subscription Activated</h1>
+<h1>Subscription Activated</h1>
 
-   <p>Your GuardFlo account is now active.</p>
+<p>Your GuardFlo account is now active.</p>
 
-   <p>
-   API credentials and onboarding instructions will be
-   delivered shortly.
-   </p>
+<div class="credentials-box">
 
-   <a href="/" class="btn-primary">Return to Platform</a>
+<h3>Your API Credentials</h3>
 
- </div>
+<p><strong>Tenant ID</strong></p>
+<code>{{ tenant_id }}</code>
+
+<p><strong>API Key</strong></p>
+</div class="api-key-row">
+     <code>{{ api_key }}</code>
+
+     <button onclick="copyKey()" class="copy-btn">
+      Copy
+     </button>
+</div>
+
+<h3>Quick Start</h3>
+
+<pre>
+curl https://api.guardflo.com/api/v1/decide \
+ -H "Authorization: Bearer {{ api_key }}" \
+ -H "Content-Type: application/json" \
+ -d '{
+   "transaction_id": "txn_123",
+   "amount": 5000,
+   "currency": "USD"
+ }'
+</pre>
+
+<p>
+Save your API key securely. For security reasons this key will only be shown once.
+</p>
+
+<a href="/docs" class="btn-primary">View Documentation</a>
+
+</div>
 </section>
+<script>
+  function copyKey() {
+    const key = document.getElementById("apiKey").innerText;
+    navigator.clipboard.writeText(key);
 
+    alert("API key copied to clipboard");
+}
+</script>
 {% endblock %}
