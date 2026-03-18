@@ -17,7 +17,6 @@ class FinancialDecisionRequest(BaseModel):
    approval_chain_depth: int = Field(..., ge=0)
    fan_out: int = Field(..., ge=1)
    created_at: Optional[datetime] = None
-   nonce: int = 0
    category: Optional[str] = None
    actor_type: Optional[str] = None
    agent_id: Optional[str] = None
