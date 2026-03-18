@@ -222,6 +222,7 @@ def financial_decision(
    idempotency_key: str = Header(...),
    db: Session = Depends(get_db),
 ):
+   print("RAW REQUEST:", request.dict())
 
    organisation = resolve_organisation(api_key=x_api_key, db=db)
 
@@ -376,7 +377,7 @@ def financial_decision(
            result = future.result()
 
        timestamp = datetime.utcnow().isoformat()
-       
+
        approved = result["approved"]
        risk_score = result["risk_score"]
        violations = result["violations"]
