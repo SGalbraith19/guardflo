@@ -376,6 +376,16 @@ def financial_decision(
            result = future.result()
 
        timestamp = datetime.utcnow().isoformat()
+       
+       approved = result["approved"]
+       risk_score = result["risk_score"]
+       violations = result["violations"]
+
+       if ai_override:
+           approved = False
+           risk_score = max(risk_score,90)
+           violations = violations + [ai_violation]
+
 
        decision_payload = {
            "decision_id": decision_id,
@@ -388,11 +398,6 @@ def financial_decision(
            "violations": violations,
            "explanation": result["explanation"],
        }
-
-       if ai_override:
-           approved = False
-           risk_score = max(risk_score,90)
-           violations = violations + [ai_violation]
 
        signature = sign_decision(decision_payload)
        decision_payload["signature"] = signature
