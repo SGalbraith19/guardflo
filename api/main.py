@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from pydantic import BaseModel
 
+from requests import request
 from sqlalchemy.orm import Session
 from sqlalchemy import func, create_engine
 
@@ -232,6 +233,13 @@ def financial_decision(
 
    tenant_id = organisation.id
 
+   ai_override = False
+   ai_violation = None
+
+   if request.actor_type == "ai_agent" and request.approval_chain_depth < 1:
+    ai_override = True
+    ai_violation = "ai_agent_payment_blocked"
+
    try:
 
        # -----------------------------
@@ -375,11 +383,16 @@ def financial_decision(
            "policy_version": request.policy_version,
            "engine_version": ENGINE_VERSION,
            "timestamp": timestamp,
-           "approved": result["approved"],
-           "risk_score": result["risk_score"],
-           "violations": result["violations"],
+           "approved": approved,
+           "risk_score": risk_score,
+           "violations": violations,
            "explanation": result["explanation"],
        }
+
+       if ai_override:
+           approved = False
+           risk_score = max(risk_score,90)
+           violations = violations + [ai_violation]
 
        signature = sign_decision(decision_payload)
        decision_payload["signature"] = signature
@@ -471,6 +484,7 @@ def financial_decision(
            500,
            f"Atomic enforcement failure: {str(e)}"
        )
+       
 
 # ---------------------------------------------------
 # SIGNATURE VERIFICATION

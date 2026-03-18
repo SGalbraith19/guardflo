@@ -19,6 +19,8 @@ class FinancialDecisionRequest(BaseModel):
    created_at: Optional[datetime] = None
    nonce: int = 0
    category: Optional[str] = None
+   actor_type: Optional[str] = None
+   agent_id: Optional[str] = None
 
    nonce: str = Field(default_factory=lambda: secrets.token_hex(16))
 
