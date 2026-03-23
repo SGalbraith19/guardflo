@@ -216,14 +216,11 @@ def run_policy_vm(request, organisation, policy):
 # ---------------------------------------------------
 from fastapi import Request
 
-@app.post("/api/v1/decide", response_model=FinancialDecisionResponse)
-def financial_decision(
-   request: FinancialDecisionRequest,
-   x_api_key: str = Header(...),
-   idempotency_key: str = Header(...),
-   db: Session = Depends(get_db),
-):
-   print("✅ VALIDATED REQUEST:", request.dict())
+@app.post("/api/v1/decide")
+async def financial_decision(request: Request):
+   body = await request.json()
+   print("RAW BODY:", body)
+   return body
 
    organisation = resolve_organisation(api_key=x_api_key, db=db)
 
