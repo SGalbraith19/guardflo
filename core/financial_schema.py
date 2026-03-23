@@ -21,7 +21,7 @@ class FinancialDecisionRequest(BaseModel):
    actor_type: Optional[str] = None
    agent_id: Optional[str] = None
 
-   nonce: str = Field(default_factory=lambda: secrets.token_hex(16))
+   nonce: Optional[str] = None
 
 
 class FinancialDecisionResponse(BaseModel):
