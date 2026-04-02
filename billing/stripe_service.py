@@ -114,8 +114,12 @@ async def stripe_webhook(request: Request):
 
            session = event["data"]["object"]
 
-           company_name = session.get("metadata", {}).get("company_name")
-           plan = session.get("metadata", {}).get("plan")
+           print("FULL SESSION:", session)
+           print("METADATA:", session.get("metadata"))
+
+           metadata = session.get("metadata") or {}
+           company_name = metadata.get("company_name")
+           plan = metadata.get("plan")
            customer_id = session.get("customer")
 
            if not company_name or not plan:
