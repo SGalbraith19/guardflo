@@ -28,13 +28,11 @@
 <li>Standard SLA</li>
 </ul>
 
-<form action="/stripe/create-checkout-session" method="post">
+<form action="/create-checkout-session" method="post">
 <input type="hidden" name="plan" value="starter">
 <input type="hidden" name="company_name" value="Demo Company">
 <input type="hidden" name="customer_email" value="demo@company.com">
 
-<!-- FIX -->
-<input type="hidden" name="price_id" value="price_1T5gQsBjtjn8xWYF4Kgp2Irk">
 
 <button class="btn-secondary pricing-btn">
 Select
@@ -57,13 +55,12 @@ Select
 <li>Webhook sync</li>
 </ul>
 
-<form action="/stripe/create-checkout-session" method="post">
+<form action="/create-checkout-session" method="post">
 <input type="hidden" name="plan" value="pro">
 <input type="hidden" name="company_name" value="Demo Company">
 <input type="hidden" name="customer_email" value="demo@company.com">
 
-<!-- FIX -->
-<input type="hidden" name="price_id" value="price_1T5gRIBjtjn8xWYF8I33iEe">
+
 
 <button class="btn-primary pricing-btn">
 Select
@@ -86,13 +83,11 @@ Select
 <li>Advanced compliance tooling</li>
 </ul>
 
-<form action="/stripe/create-checkout-session" method="post">
+<form action="/create-checkout-session" method="post">
 <input type="hidden" name="plan" value="enterprise">
 <input type="hidden" name="company_name" value="Demo Company">
 <input type="hidden" name="customer_email" value="demo@company.com">
 
-<!-- FIX -->
-<input type="hidden" name="price_id" value="price_1T5gRjBjtjn8xWYFuuPsx3h5">
 
 <button class="btn-secondary pricing-btn">
 Select

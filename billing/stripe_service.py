@@ -25,10 +25,16 @@ endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 # TIER CONFIG
 # =========================================================
 
-TIER_LIMITS = {
+TIER_PRICE_IDS = {
    "starter": "price_1T5gQsBjtjn8xWYF4Kgp2Irk",
-   "pro": "price_1T5gRIBjtjn8xWYFeI833jEe",
+   "pro": "price_1T5gR1Bjtjn8xWYFeI833JeE",
    "enterprise": "price_1T5gRjBjtjn8xWYFuuPsx3h5",
+}
+
+TIER_QUOTAS = {
+   "starter": 10_000,
+   "pro": 100_000,
+   "enterprise": None  # unlimited
 }
 
 # =========================================================
@@ -40,7 +46,6 @@ async def create_checkout_session(
    company_name: str = Form(...),
    plan: str = Form(...),
    customer_email: str = Form(...),
-   price_id: str = Form(...)
 ):
    """
    Creates Stripe checkout session.
@@ -48,10 +53,10 @@ async def create_checkout_session(
    It is created only after successful payment via webhook.
    """
 
-   if plan not in TIER_LIMITS:
+   if plan not in TIER_QUOTAS:
        raise HTTPException(status_code=400, detail="Invalid plan")
    
-   price_id = TIER_LIMITS[plan]
+   price_id = TIER_QUOTAS[plan]
 
    try:
        session = stripe.checkout.Session.create(
@@ -68,8 +73,8 @@ async def create_checkout_session(
                "company_name": company_name,
                "plan": plan,
            },
-           success_url="http://127.0.0.1:8000/success?session_id={CHECKOUT_SESSION_ID}",
-           cancel_url="http://127.0.0.1:8000/pricing",
+           success_url="http://guardflo-production.up.railway.app/success?session_id={CHECKOUT_SESSION_ID}",
+           cancel_url="http://guardflo-production.up.railway.app/pricing",
        )
 
        return RedirectResponse(session.url, status_code=303)
@@ -117,7 +122,11 @@ async def stripe_webhook(request: Request):
                return {"status": "missing metadata"}
 
            # Prevent duplicate tenant creation
-           existing = None                
+           existing = db.query(Organisation).filter(
+               Organisation.stripe_customer_id == customer_id
+              ).first()   
+           if existing:
+               return {"status": "tenant already exists"}         
 
            # Generate API key
            
@@ -132,7 +141,7 @@ async def stripe_webhook(request: Request):
                active=True,
                stripe_customer_id=customer_id,
                api_key=hashed_key,
-               quota_limit=TIER_LIMITS.get(plan, 1000),
+               quota_limit=TIER_QUOTAS.get(plan),
 
                first_api_key=raw_api_key
            )
@@ -237,7 +246,7 @@ async def checkout_success(request: Request, session_id: str):
 def create_portal_session(customer_id: str):
    session = stripe.billing_portal.Session.create(
        customer=customer_id,
-       return_url="http://localhost:8000"
+       return_url="http://guardflo-production.up.railway.app/success?session_id={CHECKOUT_SESSION_ID}"
    )
    return {"url": session.url}
 

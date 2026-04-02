@@ -216,11 +216,13 @@ def run_policy_vm(request, organisation, policy):
 # ---------------------------------------------------
 from fastapi import Request
 
-@app.post("/api/v1/decide")
-async def financial_decision(request: Request):
-   body = await request.json()
-   print("RAW BODY:", body)
-   return body
+@app.post("/api/v1/decide", response_model=FinancialDecisionResponse)
+def financial_decision(
+   request: FinancialDecisionRequest,
+   x_api_key: str = Header(...),
+   idempotency_key: str = Header(...),
+   db: Session = Depends(get_db),
+):
 
    organisation = resolve_organisation(api_key=x_api_key, db=db)
 
@@ -229,6 +231,14 @@ async def financial_decision(request: Request):
 
    if not organisation.subscription_active:
        raise HTTPException(403, "Subscription inactive")
+   
+   usage_count = db.query(FinancialLedger).filter(
+       FinancialLedger.organisation_id == organisation.id,
+       FinancialLedger.created_at >= datetime.utcnow() - timedelta(days=30)
+   ).count()
+
+   if organisation.tier and usage_count >= organisation.quota_limit:
+       raise HTTPException(403, "Quota exceeded")
 
    tenant_id = organisation.id
 
