@@ -56,7 +56,7 @@ async def create_checkout_session(
    if plan not in TIER_QUOTAS:
        raise HTTPException(status_code=400, detail="Invalid plan")
    
-   price_id = TIER_QUOTAS[plan]
+   price_id = TIER_PRICE_IDS[plan]
 
    try:
        session = stripe.checkout.Session.create(
